@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Memoria - Lazos Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --denim-blue: #be185d; /* Updated from blue to vibrant fuchsia */
+            --pink-light: #fce7f3;
+            --pink-border: #f472b6;
+            --pink-accent: #db2777;
+            --yellow-accent: #fde047;
+            --blue-button: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--denim-blue);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .font-cursive {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        .notebook-card {
+            background-color: #ffffff;
+            background-image: repeating-linear-gradient(
+                transparent,
+                transparent 31px,
+                #e5e7eb 31px,
+                #e5e7eb 32px
+            );
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+            border-radius: 1.5rem;
+            position: relative;
+        }
+
+        .notebook-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 24px;
+            width: 2px;
+            background-color: #fca5a5;
+            z-index: 1;
+        }
+
+        .content-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Card 3D Flip Effects */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Card Face-Down (Back of card) */
+        .card-back {
+            background-color: var(--pink-light);
+            border: 2px dashed var(--pink-border);
+            background-image: radial-gradient(var(--yellow-accent) 22%, transparent 22%);
+            background-size: 16px 16px;
+            transform: rotateY(0deg);
+        }
+
+        /* Card Face-Up (Front of card) */
+        .card-front {
+            background-color: #fbcfe8;
+            border: 2px solid var(--pink-accent);
+            transform: rotateY(180deg);
+            color: #831843;
+        }
+
+        /* Pulse animation for vibrant play button */
+        @keyframes customPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(244, 114, 182, 0.6); }
+            50% { transform: scale(1.04); box-shadow: 0 0 35px rgba(250, 204, 21, 0.9); }
+        }
+
+        .btn-vibrant {
+            animation: customPulse 2.5s infinite ease-in-out;
+        }
+
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 no-select">
+
+    <main id="screen-initial" class="w-full max-w-md notebook-card p-6 sm:p-10 text-center transition-all duration-300">
+        <div class="content-container flex flex-col items-center">
+            <h1 class="font-cursive text-[clamp(2.8rem,11vw,5.5rem)] text-pink-600 mb-1 leading-tight whitespace-nowrap drop-shadow-sm">
+                Lazos Shop
+            </h1>
+            <p class="text-xs sm:text-sm uppercase tracking-widest font-black text-pink-700 mb-6">
+                Juego de Memoria
+            </p>
+            <div class="bg-pink-50/90 rounded-2xl p-4 mb-8 border-2 border-pink-200 text-gray-700 text-sm sm:text-base leading-relaxed text-center shadow-sm w-full">
+                <p class="font-bold text-pink-700 text-base sm:text-lg mb-1">
+                    ¡Encuentra el descuento! 💖✨
+                </p>
+                <p class="text-xs sm:text-sm text-gray-600">
+                    Descubre el par de descuento en menos de <b>25 segundos</b>. ¡Evita las <b>'X'</b> para no perder!
+                </p>
+            </div>
+            <button onclick="startGame()" class="btn-vibrant group relative overflow-hidden bg-gradient-to-r from-pink-500 via-rose-500 to-yellow-400 hover:from-pink-600 hover:via-rose-600 hover:to-yellow-500 text-white font-black py-4 px-10 rounded-full shadow-xl hover:shadow-2xl transform active:scale-95 transition-all text-lg sm:text-xl border-2 border-white flex items-center justify-center gap-3 w-full sm:w-auto">
+                <span class="drop-shadow-md">¡JUGAR AHORA!</span>
+                <span class="text-2xl transform group-hover:rotate-12 transition-transform">🎁</span>
+            </button>
+        </div>
+    </main>
+
+    <main id="screen-game" class="w-full max-w-2xl notebook-card p-4 sm:p-8 hidden flex-col items-center">
+        <div class="content-container w-full">
+            <div class="flex flex-wrap items-center justify-between border-b-2 border-pink-200 pb-4 mb-6 gap-2">
+                <div>
+                    <h2 class="font-cursive text-2xl sm:text-3xl text-pink-600 whitespace-nowrap leading-none">
+                        Lazos Shop
+                    </h2>
+                </div>
+                <div class="flex items-center gap-1.5 bg-yellow-100 border-2 border-yellow-300 px-3.5 py-1.5 rounded-full shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span id="timer-display" class="font-bold text-xl text-yellow-900 min-w-[28px]">25</span>
+                    <span class="text-xs font-bold text-yellow-700">seg</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="restartGame()" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold py-1.5 px-3 rounded-lg shadow-sm text-xs sm:text-sm transition-colors flex items-center gap-1 border border-yellow-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Reintentar</span>
+                    </button>
+                    <button onclick="goHome()" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm text-xs sm:text-sm transition-colors border border-pink-400">
+                        Volver
+                    </button>
+                </div>
+            </div>
+            <div id="cards-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 w-full h-[380px] sm:h-[340px] perspective-1000">
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-xs">
+        <div id="modal-win" class="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center hidden border-4 border-pink-400 shadow-2xl transform transition-all">
+            <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">🎁</div>
+            <h3 class="font-cursive text-4xl sm:text-5xl text-pink-600 mb-2">¡Felicitaciones!</h3>
+            <p id="win-text" class="text-gray-700 font-semibold mb-6 text-sm sm:text-base">¡Has completado el par de descuento correctamente!</p>
+            <button onclick="goHome()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-xl shadow border-2 border-yellow-300 transition-colors text-base">Volver a Inicio</button>
+        </div>
+        <div id="modal-lose" class="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center hidden border-4 border-yellow-400 shadow-2xl transform transition-all">
+            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">🎀</div>
+            <h3 class="font-cursive text-4xl text-gray-800 mb-2">Gracias por participar</h3>
+            <p id="lose-reason" class="text-gray-600 mb-6 text-sm sm:text-base font-medium">Sigue intentándolo para obtener tu premio.</p>
+            <button onclick="goHome()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-xl shadow border-2 border-yellow-300 transition-colors text-base">Volver a Inicio</button>
+        </div>
+    </div>
+
+    <script>
+        const CARD_DEFINITIONS = [
+            { type: 'disc10', label: '10%<br><span class="text-xs font-semibold uppercase tracking-wider">descuento</span>' },
+            { type: 'disc10', label: '10%<br><span class="text-xs font-semibold uppercase tracking-wider">descuento</span>' },
+            { type: 'disc25', label: '25%<br><span class="text-xs font-semibold uppercase tracking-wider">descuento</span>' },
+            { type: 'disc25', label: '25%<br><span class="text-xs font-semibold uppercase tracking-wider">descuento</span>' },
+            { type: 'retry', label: 'Volver a<br>intentar' },
+            { type: 'retry', label: 'Volver a<br>intentar' },
+            { type: 'retry', label: 'Volver a<br>intentar' },
+            { type: 'lose', label: '<span class="text-3xl font-black text-red-600">X</span><br><span class="text-[10px] text-gray-600 uppercase font-bold">Fin del juego</span>' },
+            { type: 'lose', label: '<span class="text-3xl font-black text-red-600">X</span><br><span class="text-[10px] text-gray-600 uppercase font-bold">Fin del juego</span>' },
+            { type: 'lose', label: '<span class="text-3xl font-black text-red-600">X</span><br><span class="text-[10px] text-gray-600 uppercase font-bold">Fin del juego</span>' }
+        ];
+
+        let deck = [];
+        let flippedCardIndices = [];
+        let timerSeconds = 25;
+        let timerInterval = null;
+        let isBoardLocked = false;
+
+        const screenInitial = document.getElementById('screen-initial');
+        const screenGame = document.getElementById('screen-game');
+        const cardsGrid = document.getElementById('cards-grid');
+        const timerDisplay = document.getElementById('timer-display');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalWin = document.getElementById('modal-win');
+        const modalLose = document.getElementById('modal-lose');
+        const loseReasonText = document.getElementById('lose-reason');
+        const winText = document.getElementById('win-text');
+
+        function startGame() {
+            screenInitial.classList.add('hidden');
+            screenGame.classList.remove('hidden');
+            screenGame.classList.add('flex');
+            restartGame();
+        }
+
+        function goHome() {
+            stopTimer();
+            closeModals();
+            screenGame.classList.add('hidden');
+            screenGame.classList.remove('flex');
+            screenInitial.classList.remove('hidden');
+        }
+
+        function restartGame() {
+            stopTimer();
+            closeModals();
+            isBoardLocked = false;
+            flippedCardIndices = [];
+            deck = JSON.parse(JSON.stringify(CARD_DEFINITIONS));
+            shuffle(deck);
+            deck.forEach(card => card.isFlipped = false);
+            renderGrid();
+            startTimer(25);
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startTimer(seconds) {
+            timerSeconds = seconds;
+            timerDisplay.innerText = timerSeconds;
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                timerDisplay.innerText = timerSeconds;
+                if (timerSeconds <= 0) {
+                    stopTimer();
+                    showLoseModal("¡Se agotó el tiempo de 25 segundos!");
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function renderGrid() {
+            cardsGrid.innerHTML = '';
+            deck.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = `card w-full h-full cursor-pointer ${card.isFlipped ? 'flipped' : ''}`;
+                cardEl.onclick = () => handleCardClick(index);
+                cardEl.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-back">
+                            <span class="font-cursive text-pink-400 text-2xl opacity-70">Lazos</span>
+                        </div>
+                        <div class="card-front font-bold text-sm sm:text-base leading-tight">
+                            <div>${card.label}</div>
+                        </div>
+                    </div>
+                `;
+                cardsGrid.appendChild(cardEl);
+            });
+        }
+
+        function handleCardClick(index) {
+            if (isBoardLocked) return;
+            const clickedCard = deck[index];
+            if (clickedCard.isFlipped) return;
+            clickedCard.isFlipped = true;
+            renderGrid();
+            if (clickedCard.type === 'lose') {
+                stopTimer();
+                isBoardLocked = true;
+                setTimeout(() => {
+                    showLoseModal("¡Has tocado una 'X'! Fin del juego.");
+                }, 400);
+                return;
+            }
+            flippedCardIndices.push(index);
+            if (flippedCardIndices.length === 2) {
+                isBoardLocked = true;
+                const idx1 = flippedCardIndices[0];
+                const idx2 = flippedCardIndices[1];
+                const card1 = deck[idx1];
+                const card2 = deck[idx2];
+                const isDiscountMatch = (card1.type === card2.type) && (card1.type === 'disc10' || card1.type === 'disc25');
+                if (isDiscountMatch) {
+                    stopTimer();
+                    const percent = card1.type === 'disc10' ? '10%' : '25%';
+                    winText.innerText = `¡Felicidades! Has encontrado el par con el ${percent} de descuento.`;
+                    setTimeout(() => {
+                        showWinModal();
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        card1.isFlipped = false;
+                        card2.isFlipped = false;
+                        flippedCardIndices = [];
+                        renderGrid();
+                        isBoardLocked = false;
+                    }, 1000);
+                }
+            }
+        }
+
+        function showWinModal() {
+            modalOverlay.classList.remove('hidden');
+            modalWin.classList.remove('hidden');
+            modalLose.classList.add('hidden');
+        }
+
+        function showLoseModal(reason) {
+            loseReasonText.innerText = reason;
+            modalOverlay.classList.remove('hidden');
+            modalLose.classList.remove('hidden');
+            modalWin.classList.add('hidden');
+        }
+
+        function closeModals() {
+            modalOverlay.classList.add('hidden');
+            modalWin.classList.add('hidden');
+            modalLose.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
